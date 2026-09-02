@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowUpRight, 
   ChevronRight,
@@ -12,10 +12,6 @@ import {
   Server,
   Play,
   RotateCcw,
-  CheckCircle2,
-  Calendar,
-  Clock,
-  ArrowRight,
   Copy,
   Check
 } from 'lucide-react';
