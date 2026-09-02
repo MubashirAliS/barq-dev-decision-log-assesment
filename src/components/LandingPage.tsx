@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowUpRight, 
   ChevronRight,
@@ -22,24 +22,95 @@ interface LandingPageProps {
   onLaunchDemo: () => void;
 }
 
+// Running Counter Component triggered on scroll into view
+const RunningCounter: React.FC<{
+  target: number;
+  suffix?: string;
+  prefix?: string;
+  decimals?: number;
+  duration?: number;
+}> = ({ target, suffix = '', prefix = '', decimals = 0, duration = 1600 }) => {
+  const [count, setCount] = useState(0);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasStarted(true);
+        } else {
+          // Reset so it runs again when scrolling up and down
+          setHasStarted(false);
+          setCount(0);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
+    let start = 0;
+    const startTime = performance.now();
+
+    const updateCounter = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Smooth easeOutExpo curve
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const currentVal = easeProgress * target;
+
+      setCount(currentVal);
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      } else {
+        setCount(target);
+      }
+    };
+
+    requestAnimationFrame(updateCounter);
+  }, [hasStarted, target, duration]);
+
+  return (
+    <div ref={elementRef} className="tabular-nums font-mono font-bold">
+      <span>{prefix}</span>
+      <span>{decimals > 0 ? count.toFixed(decimals) : Math.floor(count)}</span>
+      <span>{suffix}</span>
+    </div>
+  );
+};
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
   const [activeCodeTab, setActiveCodeTab] = useState<'decision' | 'eval' | 'adr'>('decision');
   const [copied, setCopied] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Scroll reveal observer hook
+  // Scroll reveal observer
   useEffect(() => {
     const observerCallback: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-revealed');
+        } else {
+          // Re-trigger reveal when scrolling upward
+          entry.target.classList.remove('is-revealed');
         }
       });
     };
 
     const observer = new IntersectionObserver(observerCallback, {
-      threshold: 0.12,
-      rootMargin: '0px 0px -40px 0px'
+      threshold: 0.1,
+      rootMargin: '0px 0px -20px 0px'
     });
 
     const elements = document.querySelectorAll('.reveal-on-scroll, .reveal-left, .reveal-right');
@@ -68,15 +139,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 antialiased selection:bg-orange-500 selection:text-white font-sans overflow-x-hidden">
       
       {/* Top Header Navbar */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-8 py-3 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800/80">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-neutral-900 border border-neutral-700/80 flex items-center justify-center text-orange-400 font-mono font-bold text-xs sm:text-sm shadow-md shrink-0">
+      <header className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800/80">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          
+          {/* Logo */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-neutral-900 border border-neutral-700/80 flex items-center justify-center text-orange-400 font-mono font-bold text-xs shadow-md">
               D
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-bold text-sm sm:text-base tracking-tight text-white">Decision Log</span>
-              <span className="text-[9px] sm:text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 hidden xs:inline-block">
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-sm sm:text-base tracking-tight text-white whitespace-nowrap">Decision Log</span>
+              <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 hidden sm:inline-block">
                 SYSTEMS ARCHITECTURE
               </span>
             </div>
@@ -90,8 +163,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
             <a href="#comparison" className="hover:text-orange-400 transition-colors">Comparison</a>
           </nav>
 
-          {/* Right Action */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Header Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -102,25 +175,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
 
             <button
               onClick={onLaunchDemo}
-              className="btn-orange-glow inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-neutral-950 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-500/20 shrink-0"
+              className="btn-orange-glow inline-flex items-center gap-1 px-2.5 sm:px-4 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-neutral-950 font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-500/20 whitespace-nowrap"
             >
               <span>Launch Demo</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-neutral-950" />
             </button>
 
-            {/* Mobile Hamburger */}
+            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileNavOpen(!mobileNavOpen)}
               className="md:hidden p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-300 hover:text-white"
             >
-              {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Dropdown Nav */}
         {mobileNavOpen && (
-          <div className="md:hidden pt-4 pb-2 px-2 space-y-2 border-t border-neutral-800/80 mt-3 animate-fade-down text-xs font-mono">
+          <div className="md:hidden pt-3 pb-2 px-1 space-y-1.5 border-t border-neutral-800/80 mt-2.5 animate-fade-down text-xs font-mono">
             <a 
               href="#overview" 
               onClick={() => setMobileNavOpen(false)}
@@ -147,20 +220,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
       </header>
 
       {/* Hero Section */}
-      <section id="overview" className="relative min-h-[92vh] flex flex-col justify-between pt-24 sm:pt-28 pb-10 overflow-hidden border-b border-neutral-900 z-10">
+      <section id="overview" className="relative min-h-[92vh] flex flex-col justify-between pt-20 sm:pt-28 pb-10 overflow-hidden border-b border-neutral-900 z-10">
         
         {/* Subtle Ambient Backlight */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[800px] h-[300px] sm:h-[450px] bg-gradient-to-r from-orange-500/15 via-amber-500/5 to-transparent blur-[120px] sm:blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[800px] h-[300px] sm:h-[450px] bg-gradient-to-r from-orange-500/15 via-amber-500/5 to-transparent blur-[120px] sm:blur-[140px] rounded-full pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 w-full flex-1 flex flex-col justify-between relative z-10">
           
           {/* Top Pill Bar */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-neutral-900 pb-4 animate-fade-up">
-            <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono text-neutral-400 bg-neutral-900/80 px-3 py-1.5 rounded-full border border-neutral-800 max-w-full">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-neutral-900 pb-3 sm:pb-4 animate-fade-up">
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs font-mono text-neutral-400 bg-neutral-900/80 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-neutral-800 max-w-full">
               <span className="text-orange-400 font-bold shrink-0">#</span>
               <span className="truncate">DECISION LOG — THE INSTITUTIONAL MEMORY ENGINE</span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono text-neutral-400 bg-neutral-900/80 px-3 py-1.5 rounded-full border border-neutral-800 shrink-0">
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs font-mono text-neutral-400 bg-neutral-900/80 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-neutral-800 shrink-0">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -170,12 +243,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </div>
 
           {/* Hero Main Content */}
-          <div className="my-auto py-8 sm:py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-14 items-center">
+          <div className="my-auto py-6 sm:py-12 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-14 items-center">
             
             {/* Left Headline */}
-            <div className="lg:col-span-7 space-y-5 sm:space-y-6 reveal-left">
-              <div className="space-y-2.5 sm:space-y-3">
-                <span className="text-xs font-mono uppercase tracking-widest text-orange-400 font-semibold block">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-6 reveal-left">
+              <div className="space-y-2 sm:space-y-3">
+                <span className="text-[11px] sm:text-xs font-mono uppercase tracking-widest text-orange-400 font-semibold block">
                   ARCHITECTURE & PRODUCT MOMENTUM
                 </span>
                 <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.12]">
@@ -184,14 +257,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
                 </h1>
               </div>
 
-              <p className="max-w-xl text-neutral-300 text-sm sm:text-lg font-normal leading-relaxed">
+              <p className="max-w-xl text-neutral-300 text-xs sm:text-lg font-normal leading-relaxed">
                 When teams scale, original reasoning evaporates. Founders and architects use Decision Log as an immutable registry to capture <em>what was decided</em>, <em>why</em>, and <em>what it supersedes</em>.
               </p>
 
-              <div className="pt-2 sm:pt-3 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+              <div className="pt-2 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3">
                 <button
                   onClick={onLaunchDemo}
-                  className="btn-orange-glow inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-neutral-950 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer shadow-xl shadow-orange-500/25"
+                  className="btn-orange-glow inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-3 sm:py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-neutral-950 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer shadow-xl shadow-orange-500/25"
                 >
                   <span>Explore Interactive Registry</span>
                   <ArrowUpRight className="w-4 h-4 text-neutral-950" />
@@ -199,7 +272,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
 
                 <a
                   href="#system"
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white font-semibold text-xs sm:text-sm uppercase tracking-wider transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white font-semibold text-xs sm:text-sm uppercase tracking-wider transition-all"
                 >
                   <span>System Architecture</span>
                   <ChevronRight className="w-4 h-4 text-orange-400" />
@@ -212,17 +285,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
               <div className="bg-neutral-900/80 rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl">
                 
                 {/* Code Window Header */}
-                <div className="bg-neutral-950 px-4 py-3 border-b border-neutral-800 flex items-center justify-between">
+                <div className="bg-neutral-950 px-3.5 py-2.5 sm:py-3 border-b border-neutral-800 flex items-center justify-between">
                   <div className="flex items-center gap-2 overflow-hidden">
                     <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80 shrink-0"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80 shrink-0"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 shrink-0"></div>
-                    <span className="ml-2 text-[11px] sm:text-xs font-mono text-neutral-400 truncate">adr/DEC-042.ts</span>
+                    <span className="ml-2 text-[10px] sm:text-xs font-mono text-neutral-400 truncate">adr/DEC-042.ts</span>
                   </div>
 
                   <button
                     onClick={handleCopyCode}
-                    className="text-neutral-400 hover:text-white text-xs font-mono flex items-center gap-1.5 px-2.5 py-1 rounded bg-neutral-900 border border-neutral-800 transition cursor-pointer shrink-0"
+                    className="text-neutral-400 hover:text-white text-[11px] sm:text-xs font-mono flex items-center gap-1 px-2 py-1 rounded bg-neutral-900 border border-neutral-800 transition cursor-pointer shrink-0"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-orange-400" />}
                     <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -230,7 +303,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
                 </div>
 
                 {/* Sub-tabs */}
-                <div className="bg-neutral-900 px-3 py-2 border-b border-neutral-800/80 flex items-center gap-1.5 overflow-x-auto text-[10px] sm:text-[11px] font-mono">
+                <div className="bg-neutral-900 px-2.5 py-2 border-b border-neutral-800/80 flex items-center gap-1.5 overflow-x-auto text-[10px] sm:text-[11px] font-mono scrollbar-none">
                   <button
                     onClick={() => setActiveCodeTab('decision')}
                     className={`px-2.5 py-1 rounded-md transition-all whitespace-nowrap cursor-pointer ${
@@ -264,7 +337,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
                 </div>
 
                 {/* Code Body */}
-                <div className="p-4 bg-neutral-950 font-mono text-xs text-neutral-300 overflow-x-auto min-h-[200px] sm:min-h-[220px] max-h-[260px] leading-relaxed">
+                <div className="p-3.5 sm:p-4 bg-neutral-950 font-mono text-xs text-neutral-300 overflow-x-auto min-h-[180px] sm:min-h-[220px] max-h-[260px] leading-relaxed">
                   {activeCodeTab === 'decision' && (
                     <pre><code><span className="text-orange-400">export const</span> DEC_042 = &#123;
   code: <span className="text-emerald-300">"DEC-042"</span>,
@@ -305,7 +378,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
                 </div>
 
                 {/* Status bottom bar */}
-                <div className="bg-neutral-950 px-4 py-2.5 border-t border-neutral-800 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-neutral-400">
+                <div className="bg-neutral-950 px-3.5 py-2 border-t border-neutral-800 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-neutral-400">
                   <span className="flex items-center gap-1.5 text-emerald-400">
                     <Play className="w-3 h-3" /> Immutable Audit Trail
                   </span>
@@ -315,24 +388,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
             </div>
           </div>
 
-          {/* Bottom KPI Bar */}
+          {/* Running Numbers KPI Strip */}
           <div className="pt-6 border-t border-neutral-900 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 font-mono reveal-on-scroll">
+            
             <div className="p-3.5 sm:p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-orange-500/40 transition-colors">
-              <div className="text-xl sm:text-3xl font-bold text-white font-mono">0 hrs</div>
+              <div className="text-2xl sm:text-4xl text-white font-bold">
+                <RunningCounter target={0} suffix=" hrs" duration={800} />
+              </div>
               <div className="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider mt-1">Slack Search Lost</div>
             </div>
+
             <div className="p-3.5 sm:p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-orange-500/40 transition-colors">
-              <div className="text-xl sm:text-3xl font-bold text-orange-400 font-mono">100%</div>
+              <div className="text-2xl sm:text-4xl text-orange-400 font-bold">
+                <RunningCounter target={100} suffix="%" duration={1600} />
+              </div>
               <div className="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider mt-1">SOC2 Audit Ready</div>
             </div>
+
             <div className="p-3.5 sm:p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-orange-500/40 transition-colors">
-              <div className="text-xl sm:text-3xl font-bold text-white font-mono">4.2x</div>
+              <div className="text-2xl sm:text-4xl text-white font-bold">
+                <RunningCounter target={4.2} decimals={1} suffix="x" duration={1800} />
+              </div>
               <div className="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider mt-1">Faster Onboarding</div>
             </div>
+
             <div className="p-3.5 sm:p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-orange-500/40 transition-colors">
-              <div className="text-xl sm:text-3xl font-bold text-emerald-400 font-mono">&lt; 30s</div>
+              <div className="text-2xl sm:text-4xl text-emerald-400 font-bold">
+                <RunningCounter target={30} prefix="< " suffix="s" duration={1400} />
+              </div>
               <div className="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider mt-1">To Log Binding Decision</div>
             </div>
+
           </div>
         </div>
       </section>
@@ -360,90 +446,90 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
       </div>
 
       {/* Core Architectural Pillars */}
-      <section id="system" className="py-20 sm:py-24 bg-neutral-950 text-white relative z-10 border-t border-neutral-900">
+      <section id="system" className="py-16 sm:py-24 bg-neutral-950 text-white relative z-10 border-t border-neutral-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-10 sm:mb-12 reveal-on-scroll">
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-3.5 mb-8 sm:mb-12 reveal-on-scroll">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
-              <span className="text-xs font-mono uppercase tracking-[0.25em] text-neutral-400 font-semibold">
+              <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-neutral-400 font-semibold">
                 SYSTEMS ARCHITECTURE & CONTROL
               </span>
             </div>
             <span className="text-xs font-mono text-neutral-500 font-medium">(01)</span>
           </div>
 
-          <div className="max-w-3xl space-y-4 mb-12 sm:mb-16 reveal-on-scroll">
+          <div className="max-w-3xl space-y-3 sm:space-y-4 mb-10 sm:mb-16 reveal-on-scroll">
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
               Designed for technical teams who value precision and momentum.
             </h2>
-            <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
+            <p className="text-neutral-400 text-xs sm:text-base leading-relaxed">
               Every major architectural choice has consequences. Capture them cleanly so future engineers don't rewrite working code out of missing context.
             </p>
           </div>
 
           {/* 3 Pillar Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             
-            <div className="orange-card-hover relative flex flex-col justify-between min-h-[300px] sm:min-h-[320px] p-6 sm:p-7 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 reveal-on-scroll">
+            <div className="orange-card-hover relative flex flex-col justify-between min-h-[280px] sm:min-h-[320px] p-5 sm:p-7 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 reveal-on-scroll">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono tracking-widest text-neutral-500 font-bold">01</span>
-                <span className="rounded-full border border-neutral-700/80 bg-neutral-950/80 px-3 py-1 text-[10px] font-mono text-orange-400 uppercase">
+                <span className="rounded-full border border-neutral-700/80 bg-neutral-950/80 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] font-mono text-orange-400 uppercase">
                   Declarative
                 </span>
               </div>
-              <div className="my-5 sm:my-6 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-orange-400 mb-4 shadow-md">
-                  <Terminal className="w-5 h-5" />
+              <div className="my-4 sm:my-6 space-y-2">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-orange-400 mb-3 sm:mb-4 shadow-md">
+                  <Terminal className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-white">Binding Decision Statement</h3>
                 <p className="text-xs text-neutral-400 leading-relaxed">
                   A single declarative commitment. No ambiguity or vague intentions—just the explicit standard agreed upon by leadership.
                 </p>
               </div>
-              <div className="pt-3 border-t border-neutral-800/80 text-[11px] font-mono text-neutral-500">
+              <div className="pt-3 border-t border-neutral-800/80 text-[10px] sm:text-[11px] font-mono text-neutral-500">
                 Guaranteed clarity across teams
               </div>
             </div>
 
-            <div className="orange-card-hover relative flex flex-col justify-between min-h-[300px] sm:min-h-[320px] p-6 sm:p-7 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 reveal-on-scroll">
+            <div className="orange-card-hover relative flex flex-col justify-between min-h-[280px] sm:min-h-[320px] p-5 sm:p-7 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 reveal-on-scroll">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono tracking-widest text-neutral-500 font-bold">02</span>
-                <span className="rounded-full border border-neutral-700/80 bg-neutral-950/80 px-3 py-1 text-[10px] font-mono text-orange-400 uppercase">
+                <span className="rounded-full border border-neutral-700/80 bg-neutral-950/80 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] font-mono text-orange-400 uppercase">
                   Anti-Redebate
                 </span>
               </div>
-              <div className="my-5 sm:my-6 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-orange-400 mb-4 shadow-md">
-                  <RotateCcw className="w-5 h-5" />
+              <div className="my-4 sm:my-6 space-y-2">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-orange-400 mb-3 sm:mb-4 shadow-md">
+                  <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-white">Rejected Alternatives Log</h3>
                 <p className="text-xs text-neutral-400 leading-relaxed">
                   Documents the runner-up solutions and the exact reasons they were discarded, permanently ending recurring circular debates.
                 </p>
               </div>
-              <div className="pt-3 border-t border-neutral-800/80 text-[11px] font-mono text-neutral-500">
+              <div className="pt-3 border-t border-neutral-800/80 text-[10px] sm:text-[11px] font-mono text-neutral-500">
                 Saves hundreds of meeting hours
               </div>
             </div>
 
-            <div className="orange-card-hover relative flex flex-col justify-between min-h-[300px] sm:min-h-[320px] p-6 sm:p-7 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 reveal-on-scroll">
+            <div className="orange-card-hover relative flex flex-col justify-between min-h-[280px] sm:min-h-[320px] p-5 sm:p-7 rounded-2xl border border-neutral-800/80 bg-neutral-900/40 reveal-on-scroll">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono tracking-widest text-neutral-500 font-bold">03</span>
-                <span className="rounded-full border border-neutral-700/80 bg-neutral-950/80 px-3 py-1 text-[10px] font-mono text-orange-400 uppercase">
+                <span className="rounded-full border border-neutral-700/80 bg-neutral-950/80 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] font-mono text-orange-400 uppercase">
                   Lineage DAG
                 </span>
               </div>
-              <div className="my-5 sm:my-6 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-orange-400 mb-4 shadow-md">
-                  <Layers className="w-5 h-5" />
+              <div className="my-4 sm:my-6 space-y-2">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-orange-400 mb-3 sm:mb-4 shadow-md">
+                  <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-white">Superseded Lineage Link</h3>
                 <p className="text-xs text-neutral-400 leading-relaxed">
                   Decisions aren’t wiped when requirements change. They are marked superseded and link directly to the replacing RFC.
                 </p>
               </div>
-              <div className="pt-3 border-t border-neutral-800/80 text-[11px] font-mono text-neutral-500">
+              <div className="pt-3 border-t border-neutral-800/80 text-[10px] sm:text-[11px] font-mono text-neutral-500">
                 Full chronological history
               </div>
             </div>
@@ -453,12 +539,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
       </section>
 
       {/* Comparison Matrix */}
-      <section id="comparison" className="py-20 bg-neutral-950 border-t border-neutral-900">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-8 reveal-on-scroll">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+      <section id="comparison" className="py-16 sm:py-20 bg-neutral-950 border-t border-neutral-900">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-6 sm:space-y-8 reveal-on-scroll">
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-3.5">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-orange-500"></span>
-              <span className="text-xs font-mono uppercase tracking-[0.25em] text-neutral-400 font-semibold">
+              <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-neutral-400 font-semibold">
                 SYSTEM COMPARISON
               </span>
             </div>
@@ -466,39 +552,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </div>
 
           <div className="overflow-x-auto border border-neutral-800 rounded-xl bg-neutral-900/40">
-            <table className="w-full text-left text-xs font-sans min-w-[550px]">
+            <table className="w-full text-left text-xs font-sans min-w-[500px]">
               <thead>
-                <tr className="border-b border-neutral-800 bg-neutral-950 text-neutral-400 font-mono text-[11px]">
-                  <th className="p-4">CAPABILITY</th>
-                  <th className="p-4">SLACK / DISCORD</th>
-                  <th className="p-4">NOTION / CONFLUENCE</th>
-                  <th className="p-4 text-orange-400 bg-orange-500/5">DECISION LOG</th>
+                <tr className="border-b border-neutral-800 bg-neutral-950 text-neutral-400 font-mono text-[10px] sm:text-[11px]">
+                  <th className="p-3.5 sm:p-4">CAPABILITY</th>
+                  <th className="p-3.5 sm:p-4">SLACK / DISCORD</th>
+                  <th className="p-3.5 sm:p-4">NOTION / CONFLUENCE</th>
+                  <th className="p-3.5 sm:p-4 text-orange-400 bg-orange-500/5">DECISION LOG</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
                 <tr>
-                  <td className="p-4 font-medium text-white">Status Tracking (Active/Superseded)</td>
-                  <td className="p-4 text-neutral-500">None</td>
-                  <td className="p-4 text-neutral-500">Manual tags (often rot)</td>
-                  <td className="p-4 text-emerald-400 font-mono bg-orange-500/5">First-class state engine</td>
+                  <td className="p-3.5 sm:p-4 font-medium text-white">Status Tracking (Active/Superseded)</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">None</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">Manual tags (often rot)</td>
+                  <td className="p-3.5 sm:p-4 text-emerald-400 font-mono bg-orange-500/5">First-class state engine</td>
                 </tr>
                 <tr>
-                  <td className="p-4 font-medium text-white">Rejected Alternatives Log</td>
-                  <td className="p-4 text-neutral-500">Lost in replies</td>
-                  <td className="p-4 text-neutral-500">Rarely documented</td>
-                  <td className="p-4 text-orange-400 font-mono bg-orange-500/5">Mandatory structured field</td>
+                  <td className="p-3.5 sm:p-4 font-medium text-white">Rejected Alternatives Log</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">Lost in replies</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">Rarely documented</td>
+                  <td className="p-3.5 sm:p-4 text-orange-400 font-mono bg-orange-500/5">Mandatory structured field</td>
                 </tr>
                 <tr>
-                  <td className="p-4 font-medium text-white">Superseded Lineage Link</td>
-                  <td className="p-4 text-neutral-500">Impossible</td>
-                  <td className="p-4 text-neutral-500">Broken bookmarks</td>
-                  <td className="p-4 text-white font-mono bg-orange-500/5">Bi-directional DAG pointers</td>
+                  <td className="p-3.5 sm:p-4 font-medium text-white">Superseded Lineage Link</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">Impossible</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">Broken bookmarks</td>
+                  <td className="p-3.5 sm:p-4 text-white font-mono bg-orange-500/5">Bi-directional DAG pointers</td>
                 </tr>
                 <tr>
-                  <td className="p-4 font-medium text-white">Audit Trail & Compliance Export</td>
-                  <td className="p-4 text-neutral-500">None</td>
-                  <td className="p-4 text-neutral-500">Manual copy paste</td>
-                  <td className="p-4 text-white font-mono bg-orange-500/5">1-Click Markdown & JSON</td>
+                  <td className="p-3.5 sm:p-4 font-medium text-white">Audit Trail & Compliance Export</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">None</td>
+                  <td className="p-3.5 sm:p-4 text-neutral-500">Manual copy paste</td>
+                  <td className="p-3.5 sm:p-4 text-white font-mono bg-orange-500/5">1-Click Markdown & JSON</td>
                 </tr>
               </tbody>
             </table>
@@ -510,7 +596,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
       <section className="py-16 sm:py-20 border-t border-neutral-900 bg-neutral-950">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="p-6 sm:p-14 rounded-3xl bg-neutral-900/60 border border-neutral-800 text-center relative overflow-hidden space-y-4 sm:space-y-5 reveal-on-scroll">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-mono">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-mono">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Zero friction decision preservation</span>
             </div>
