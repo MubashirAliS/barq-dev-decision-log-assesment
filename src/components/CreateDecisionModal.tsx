@@ -237,6 +237,20 @@ export const CreateDecisionModal: React.FC<CreateDecisionModalProps> = ({
             />
           </div>
 
+          {/* Supersedes Field */}
+          <div>
+            <label className="block font-mono text-[11px] uppercase text-neutral-400 mb-1">
+              Supersedes Previous Decision (Optional)
+            </label>
+            <input
+              type="text"
+              value={supersedes}
+              onChange={(e) => setSupersedes(e.target.value)}
+              placeholder="e.g. DEC-012"
+              className="w-full bg-[#0C0D0E] border border-white/[0.08] rounded px-3 py-1.5 text-white placeholder-neutral-600 focus:outline-none focus:border-white/30 font-mono text-[11px]"
+            />
+          </div>
+
           {/* Consequences */}
           <div>
             <div className="flex items-center justify-between mb-1">

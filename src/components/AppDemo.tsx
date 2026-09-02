@@ -4,10 +4,7 @@ import {
   Plus, 
   ArrowLeft, 
   RotateCcw, 
-  Download,
-  ChevronRight,
-  Filter,
-  Check
+  Download
 } from 'lucide-react';
 import { INITIAL_DECISIONS } from '../types/decision';
 import type { DecisionRecord, DecisionStatus, DecisionCategory } from '../types/decision';

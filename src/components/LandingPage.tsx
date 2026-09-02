@@ -1,11 +1,7 @@
 import React from 'react';
 import { 
   ArrowUpRight, 
-  CornerDownRight, 
-  Search,
-  Check,
-  ChevronRight,
-  Plus
+  ChevronRight
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -80,7 +76,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </div>
         </div>
 
-        {/* Real Decision Card Sample (Not abstract mock) */}
+        {/* Real Decision Card Sample */}
         <div className="mt-16 border border-white/[0.1] bg-[#121316] rounded-lg p-6 sm:p-7 shadow-2xl space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-4">
             <div className="flex items-center gap-2.5">
