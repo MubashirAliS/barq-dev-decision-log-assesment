@@ -73,3 +73,6 @@ should not give a speck of feeling of being written with A
 ---
 
 WTH it still looks ai , please imp[roverd it
+
+---
+Please add animations here when we scroll up and down to cards to make it feel alive. Also the modal for creating decision it self is too big.
