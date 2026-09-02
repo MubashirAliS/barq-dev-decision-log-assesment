@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowUpRight, 
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Layers,
+  ArrowRight,
+  Sliders,
+  Terminal,
+  Zap
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -10,15 +16,62 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
   const [activeTab, setActiveTab] = useState<'problem' | 'solution' | 'export'>('problem');
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const SLIDES = [
+    {
+      code: 'DEC-042',
+      category: 'Architecture',
+      status: 'active',
+      date: 'August 14, 2026',
+      title: 'Standardize on PostgreSQL with Row-Level Security for multi-tenant data isolation',
+      context: 'Database-per-tenant ballooned AWS RDS monthly costs by 68% with excessive connection pooling overhead.',
+      decision: 'Enforce RLS scoped to tenant_id on single pooled cluster. Eliminates data leaks at the engine layer.',
+      author: 'Elena Rostova',
+      role: 'VP of Engineering'
+    },
+    {
+      code: 'DEC-041',
+      category: 'Product Strategy',
+      status: 'active',
+      date: 'July 28, 2026',
+      title: 'Consolidate Swift & Kotlin into unified high-performance Progressive Web App (PWA)',
+      context: 'Dual native store releases caused 48-hour security deployment delays and consumed 55% of mobile engineering.',
+      decision: 'Sunset native codebases. Unify all feature velocity into responsive web client with WebAuthn & biometric auth.',
+      author: 'Marcus Chen',
+      role: 'Head of Product'
+    },
+    {
+      code: 'DEC-038',
+      category: 'Infrastructure',
+      status: 'active',
+      date: 'June 11, 2026',
+      title: 'Migrate inter-service microservice communication to strict Protobuf gRPC contracts',
+      context: 'JSON payload parsing overhead accounted for 30% of p99 latency spikes in the live auction cluster.',
+      decision: 'Centralize strict protobuf schemas in proto repository with automated client generation on commit.',
+      author: 'David Vance',
+      role: 'Staff Infrastructure Architect'
+    }
+  ];
+
+  // Auto-slide carousel
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentSlide = SLIDES[activeSlide];
 
   return (
     <div className="min-h-screen bg-[#08090A] text-[#E2E4E9] antialiased selection:bg-[#E2E4E9] selection:text-[#08090A] font-sans">
       
       {/* Top Navigation */}
-      <header className="border-b border-white/[0.08] sticky top-0 bg-[#08090A]/90 backdrop-blur-md z-40">
+      <header className="border-b border-white/[0.08] sticky top-0 bg-[#08090A]/90 backdrop-blur-md z-40 transition-all">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-white text-black font-mono font-bold text-xs flex items-center justify-center rounded-sm shadow-sm">
+            <div className="w-6 h-6 bg-white text-black font-mono font-bold text-xs flex items-center justify-center rounded-sm shadow-sm transition-transform hover:rotate-6">
               D
             </div>
             <span className="font-semibold text-sm tracking-tight text-white">Decision Log</span>
@@ -28,15 +81,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </div>
 
           <div className="hidden sm:flex items-center gap-6 text-xs text-neutral-400 font-medium">
-            <a href="#problem" className="hover:text-white transition">The Problem</a>
-            <a href="#schema" className="hover:text-white transition">ADR Schema</a>
-            <a href="#interactive" className="hover:text-white transition">Interactive Preview</a>
-            <a href="#comparison" className="hover:text-white transition">System Design</a>
+            <a href="#problem" className="hover:text-white transition-colors">The Problem</a>
+            <a href="#interactive-slider" className="hover:text-white transition-colors">Live Decision Stream</a>
+            <a href="#schema" className="hover:text-white transition-colors">ADR Schema</a>
+            <a href="#comparison" className="hover:text-white transition-colors">System Design</a>
           </div>
 
           <button
             onClick={onLaunchDemo}
-            className="btn-tactile px-3.5 py-1.5 rounded text-xs font-semibold bg-white text-black hover:bg-neutral-200 transition flex items-center gap-1.5 cursor-pointer shadow-md hover:shadow-lg"
+            className="btn-tactile px-3.5 py-1.5 rounded text-xs font-semibold bg-white text-black hover:bg-neutral-200 transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-md hover:shadow-white/10 hover:scale-[1.03]"
           >
             <span>Launch Registry</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -44,10 +97,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section with Entry Animation */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 animate-fade-in">
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-neutral-400 border border-white/[0.08] bg-[#101216] px-3.5 py-1.5 rounded-full shadow-inner">
+          <div className="inline-flex items-center gap-2 text-xs font-mono text-neutral-400 border border-white/[0.08] bg-[#101216] px-3.5 py-1.5 rounded-full shadow-inner hover:border-white/20 transition-colors">
             <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-indicator"></span>
             <span>Architectural Decision Records for Engineering Leaders</span>
           </div>
@@ -64,74 +117,93 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           <div className="pt-4 flex flex-wrap items-center gap-4">
             <button
               onClick={onLaunchDemo}
-              className="btn-tactile px-5 py-3 rounded bg-white text-black font-semibold text-xs sm:text-sm hover:bg-neutral-200 transition flex items-center gap-2 cursor-pointer shadow-lg shadow-white/5"
+              className="btn-tactile px-5 py-3 rounded bg-white text-black font-semibold text-xs sm:text-sm hover:bg-neutral-200 transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-lg shadow-white/5 hover:scale-[1.02]"
             >
               <span>Explore Interactive Registry</span>
               <ChevronRight className="w-4 h-4" />
             </button>
             
             <a
-              href="#schema"
-              className="btn-tactile px-4 py-3 rounded border border-white/[0.12] bg-[#111317] text-neutral-300 hover:text-white hover:border-white/25 transition text-xs sm:text-sm font-medium"
+              href="#interactive-slider"
+              className="btn-tactile px-4 py-3 rounded border border-white/[0.12] bg-[#111317] text-neutral-300 hover:text-white hover:border-white/25 transition-all duration-200 text-xs sm:text-sm font-medium"
             >
-              Read Decision Schema
+              Watch Interactive Carousel &darr;
             </a>
           </div>
         </div>
 
-        {/* Floating Interactive Live Card */}
-        <div className="mt-16 border border-white/[0.1] bg-[#101216] rounded-xl p-6 sm:p-7 shadow-2xl space-y-4 animate-float">
+        {/* Live Sliding Interactive Carousel Card */}
+        <div id="interactive-slider" className="mt-16 border border-white/[0.1] bg-[#101216] rounded-xl p-6 sm:p-7 shadow-2xl space-y-4 transition-all duration-300 relative overflow-hidden">
+          
+          {/* Slide Indicator Bar & Carousel Controls */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-4">
             <div className="flex items-center gap-2.5">
-              <span className="font-mono text-xs font-semibold px-2 py-0.5 bg-white/5 border border-white/10 rounded text-neutral-300">
-                DEC-042
+              <span className="font-mono text-xs font-semibold px-2 py-0.5 bg-white/5 border border-white/10 rounded text-neutral-300 transition-all">
+                {currentSlide.code}
               </span>
-              <span className="text-xs text-neutral-400 font-medium">Architecture</span>
+              <span className="text-xs text-neutral-400 font-medium">{currentSlide.category}</span>
               <span className="text-neutral-600">•</span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-indicator"></span>
                 ACTIVE
               </span>
             </div>
-            <span className="text-xs font-mono text-neutral-500">August 14, 2026</span>
+
+            {/* Slider Switcher Buttons */}
+            <div className="flex items-center gap-1.5 bg-[#08090A] p-1 rounded-lg border border-white/[0.06]">
+              {SLIDES.map((s, idx) => (
+                <button
+                  key={s.code}
+                  onClick={() => setActiveSlide(idx)}
+                  className={`px-2 py-0.5 text-[10px] font-mono rounded transition-all cursor-pointer ${
+                    activeSlide === idx
+                      ? 'bg-white text-black font-bold scale-105'
+                      : 'text-neutral-500 hover:text-neutral-300'
+                  }`}
+                >
+                  {s.code}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div>
-            <h3 className="text-lg sm:text-xl font-medium text-white tracking-tight">
-              Standardize on PostgreSQL with Row-Level Security for multi-tenant data isolation
+          {/* Animated Slide Content */}
+          <div key={currentSlide.code} className="animate-fade-in space-y-4">
+            <h3 className="text-lg sm:text-xl font-medium text-white tracking-tight leading-snug">
+              {currentSlide.title}
             </h3>
             
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-neutral-400">
-              <div className="bg-[#14161C] p-4 rounded-lg border border-white/[0.04]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-neutral-400">
+              <div className="bg-[#14161C] p-4 rounded-lg border border-white/[0.04] transition-all hover:border-white/10">
                 <p className="font-mono text-[11px] uppercase tracking-wider text-neutral-300 mb-1 flex items-center gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-amber-400"></span>
                   Problem Context
                 </p>
-                <p className="leading-relaxed text-neutral-400">Database-per-tenant ballooned AWS RDS monthly costs by 68% with excessive connection pooling overhead.</p>
+                <p className="leading-relaxed text-neutral-400">{currentSlide.context}</p>
               </div>
-              <div className="bg-[#14161C] p-4 rounded-lg border border-white/[0.04]">
+              <div className="bg-[#14161C] p-4 rounded-lg border border-white/[0.04] transition-all hover:border-white/10">
                 <p className="font-mono text-[11px] uppercase tracking-wider text-neutral-300 mb-1 flex items-center gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-emerald-400"></span>
                   What was decided
                 </p>
-                <p className="leading-relaxed text-neutral-200">Enforce RLS scoped to tenant_id on single pooled cluster. Eliminates data leaks at the engine layer.</p>
+                <p className="leading-relaxed text-neutral-200">{currentSlide.decision}</p>
               </div>
             </div>
-          </div>
 
-          <div className="pt-3 flex items-center justify-between text-xs text-neutral-500 border-t border-white/[0.04]">
-            <div className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded bg-neutral-800 text-neutral-300 flex items-center justify-center font-mono text-[10px] font-bold">
-                ER
-              </span>
-              <span className="text-neutral-400">Elena Rostova (VP of Engineering)</span>
+            <div className="pt-3 flex items-center justify-between text-xs text-neutral-500 border-t border-white/[0.04]">
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded bg-neutral-800 text-neutral-300 flex items-center justify-center font-mono text-[10px] font-bold">
+                  {currentSlide.author.split(' ').map(n => n[0]).join('')}
+                </span>
+                <span className="text-neutral-400">{currentSlide.author} ({currentSlide.role})</span>
+              </div>
+              <button 
+                onClick={onLaunchDemo}
+                className="text-neutral-300 hover:text-white font-medium flex items-center gap-1 cursor-pointer transition-all hover:translate-x-1"
+              >
+                Open in demo &rarr;
+              </button>
             </div>
-            <button 
-              onClick={onLaunchDemo}
-              className="text-neutral-300 hover:text-white font-medium flex items-center gap-1 cursor-pointer transition hover:translate-x-0.5"
-            >
-              Open in demo &rarr;
-            </button>
           </div>
         </div>
       </section>
@@ -168,7 +240,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
-          <div className="card-hover border border-white/[0.08] bg-[#101216] p-5 rounded-lg space-y-2.5">
+          <div className="card-hover border border-white/[0.08] bg-[#101216] p-5 rounded-lg space-y-2.5 cursor-default">
             <span className="font-mono text-neutral-500 text-[11px]">01 / RE-DEBATING</span>
             <h4 className="font-semibold text-white text-sm">Circular Discussions</h4>
             <p className="text-neutral-400">
@@ -176,7 +248,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
             </p>
           </div>
 
-          <div className="card-hover border border-white/[0.08] bg-[#101216] p-5 rounded-lg space-y-2.5">
+          <div className="card-hover border border-white/[0.08] bg-[#101216] p-5 rounded-lg space-y-2.5 cursor-default">
             <span className="font-mono text-neutral-500 text-[11px]">02 / BLACK BOXES</span>
             <h4 className="font-semibold text-white text-sm">Untouchable Systems</h4>
             <p className="text-neutral-400">
@@ -184,7 +256,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
             </p>
           </div>
 
-          <div className="card-hover border border-white/[0.08] bg-[#101216] p-5 rounded-lg space-y-2.5">
+          <div className="card-hover border border-white/[0.08] bg-[#101216] p-5 rounded-lg space-y-2.5 cursor-default">
             <span className="font-mono text-neutral-500 text-[11px]">03 / WIKI ROT</span>
             <h4 className="font-semibold text-white text-sm">Unstructured Docs</h4>
             <p className="text-neutral-400">
@@ -195,7 +267,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
       </section>
 
       {/* Interactive Tabs Section */}
-      <section id="interactive" className="max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.08]">
+      <section className="max-w-4xl mx-auto px-6 py-16 border-t border-white/[0.08]">
         <div className="space-y-3 mb-8">
           <p className="font-mono text-xs text-neutral-500 uppercase tracking-wider">Workflow Overview</p>
           <h2 className="text-2xl sm:text-3xl font-medium text-white tracking-tight">
@@ -207,9 +279,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
         <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3 text-xs font-mono">
           <button
             onClick={() => setActiveTab('problem')}
-            className={`btn-tactile px-3 py-1.5 rounded transition cursor-pointer ${
+            className={`btn-tactile px-3.5 py-2 rounded transition-all cursor-pointer ${
               activeTab === 'problem'
-                ? 'bg-white text-black font-semibold'
+                ? 'bg-white text-black font-semibold shadow-md'
                 : 'text-neutral-400 hover:text-white bg-[#101216]'
             }`}
           >
@@ -217,9 +289,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </button>
           <button
             onClick={() => setActiveTab('solution')}
-            className={`btn-tactile px-3 py-1.5 rounded transition cursor-pointer ${
+            className={`btn-tactile px-3.5 py-2 rounded transition-all cursor-pointer ${
               activeTab === 'solution'
-                ? 'bg-white text-black font-semibold'
+                ? 'bg-white text-black font-semibold shadow-md'
                 : 'text-neutral-400 hover:text-white bg-[#101216]'
             }`}
           >
@@ -227,9 +299,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </button>
           <button
             onClick={() => setActiveTab('export')}
-            className={`btn-tactile px-3 py-1.5 rounded transition cursor-pointer ${
+            className={`btn-tactile px-3.5 py-2 rounded transition-all cursor-pointer ${
               activeTab === 'export'
-                ? 'bg-white text-black font-semibold'
+                ? 'bg-white text-black font-semibold shadow-md'
                 : 'text-neutral-400 hover:text-white bg-[#101216]'
             }`}
           >
@@ -237,8 +309,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           </button>
         </div>
 
-        {/* Tab Content Box */}
-        <div className="mt-4 border border-white/[0.08] bg-[#101216] p-6 rounded-lg text-xs leading-relaxed text-neutral-300 min-h-[160px] flex items-center animate-fade-in">
+        {/* Tab Content Box with Keyframe Animation */}
+        <div key={activeTab} className="mt-4 border border-white/[0.08] bg-[#101216] p-6 rounded-lg text-xs leading-relaxed text-neutral-300 min-h-[150px] flex items-center animate-fade-in shadow-lg">
           {activeTab === 'problem' && (
             <div className="space-y-2">
               <h4 className="text-sm font-semibold text-white">Record what, why, and what was discarded</h4>
@@ -373,7 +445,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchDemo }) => {
           <div className="pt-2">
             <button
               onClick={onLaunchDemo}
-              className="btn-tactile px-6 py-3 rounded bg-white text-black font-semibold text-xs sm:text-sm hover:bg-neutral-200 transition inline-flex items-center gap-2 cursor-pointer shadow-lg shadow-white/5"
+              className="btn-tactile px-6 py-3 rounded bg-white text-black font-semibold text-xs sm:text-sm hover:bg-neutral-200 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer shadow-lg shadow-white/5 hover:scale-105"
             >
               <span>Launch Decision Registry</span>
               <ArrowUpRight className="w-4 h-4" />
