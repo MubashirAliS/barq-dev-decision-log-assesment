@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowUpRight, 
-  ChevronRight,
-  Sparkles,
-  Layers,
-  ArrowRight,
-  Sliders,
-  Terminal,
-  Zap
+  ChevronRight
 } from 'lucide-react';
 
 interface LandingPageProps {
