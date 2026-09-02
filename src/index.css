@@ -15,10 +15,61 @@
   }
 }
 
-/* Marquee continuous tape */
+/* Keyframes for smooth continuous motion across app */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDrawerRight {
+  0% { transform: translateX(100%); opacity: 0.5; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes pulseOrange {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.9); opacity: 0.6; }
+}
+
+/* Reusable animation utility classes */
+.animate-fade-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-down {
+  animation: fadeInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-drawer {
+  animation: slideDrawerRight 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal {
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: floatGentle 5s ease-in-out infinite;
 }
 
 .animate-marquee {
@@ -26,38 +77,63 @@
   width: max-content;
   animation: marquee 25s linear infinite;
 }
-
 .animate-marquee:hover {
   animation-play-state: paused;
 }
 
-/* Shimmer & glow highlights */
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.97); }
+.pulse-orange {
+  animation: pulseOrange 2.5s ease-in-out infinite;
 }
 
-.pulse-glow {
-  animation: pulseGlow 3s ease-in-out infinite;
-}
+/* Stagger animation delay helpers */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
 
-/* Card hover with orange accent border & elevation */
+/* Interactive Hover & Tactile Physics */
 .orange-card-hover {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .orange-card-hover:hover {
-  border-color: rgba(249, 115, 22, 0.5);
+  border-color: rgba(249, 115, 22, 0.45);
   transform: translateY(-3px);
-  box-shadow: 0 15px 35px -10px rgba(249, 115, 22, 0.12);
+  background-color: #14161C;
+  box-shadow: 0 16px 36px -10px rgba(249, 115, 22, 0.12);
 }
 
 .btn-orange-glow {
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-orange-glow:hover {
-  box-shadow: 0 0 25px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.4);
   transform: translateY(-1px);
 }
 .btn-orange-glow:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+.btn-tactile {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-tactile:hover {
+  transform: translateY(-1px);
+}
+.btn-tactile:active {
+  transform: scale(0.97);
+}
+
+/* Custom minimal scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #202227;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
 }
