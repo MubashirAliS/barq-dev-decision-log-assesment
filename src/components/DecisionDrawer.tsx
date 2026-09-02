@@ -3,12 +3,7 @@ import {
   X, 
   Copy, 
   Check,
-  RotateCcw,
-  Sparkles,
-  ShieldCheck,
-  Calendar,
-  User,
-  ArrowRight
+  RotateCcw
 } from 'lucide-react';
 import type { DecisionRecord, DecisionStatus } from '../types/decision';
 

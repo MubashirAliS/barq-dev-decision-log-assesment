@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { 
   X, 
   Trash2,
-  CheckCircle2,
-  Plus
+  CheckCircle2
 } from 'lucide-react';
 import type { DecisionRecord, DecisionCategory, DecisionStatus } from '../types/decision';
 
