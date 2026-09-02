@@ -2,91 +2,62 @@
 
 @layer base {
   :root {
-    --font-editorial: 'Newsreader', Georgia, serif;
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #08090A;
-    color: #E2E4E9;
-    letter-spacing: -0.012em;
+    background-color: #0a0a0a;
+    color: #ededed;
+    letter-spacing: -0.015em;
     overflow-x: hidden;
   }
 }
 
-.font-editorial {
-  font-family: var(--font-editorial);
+/* Marquee continuous tape */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
 }
 
-/* Micro-animations and tactile transitions */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
 }
 
-@keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
-@keyframes pulseSubtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(0.96); }
+/* Shimmer & glow highlights */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.97); }
 }
 
-@keyframes floatCard {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
+.pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Card hover with orange accent border & elevation */
+.orange-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.orange-card-hover:hover {
+  border-color: rgba(249, 115, 22, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px -10px rgba(249, 115, 22, 0.12);
 }
 
-.animate-slide-right {
-  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.btn-orange-glow {
+  transition: all 0.2s ease;
 }
-
-.animate-float {
-  animation: floatCard 6s ease-in-out infinite;
+.btn-orange-glow:hover {
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.35);
+  transform: translateY(-1px);
 }
-
-.pulse-indicator {
-  animation: pulseSubtle 2.5s ease-in-out infinite;
-}
-
-/* Card hover and interactive tactile physics */
-.card-hover {
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.card-hover:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  background-color: #14161B;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6);
-}
-
-.btn-tactile {
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn-tactile:active {
-  transform: scale(0.97);
-}
-
-/* Custom minimal scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: #08090A;
-}
-::-webkit-scrollbar-thumb {
-  background: #202227;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #32353E;
+.btn-orange-glow:active {
+  transform: scale(0.98);
 }
