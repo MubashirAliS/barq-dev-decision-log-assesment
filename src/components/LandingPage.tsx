@@ -58,7 +58,6 @@ const RunningCounter: React.FC<{
   useEffect(() => {
     if (!hasStarted) return;
 
-    let start = 0;
     const startTime = performance.now();
 
     const updateCounter = (currentTime: number) => {
