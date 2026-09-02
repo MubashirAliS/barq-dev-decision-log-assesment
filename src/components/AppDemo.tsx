@@ -4,11 +4,10 @@ import {
   Plus, 
   ArrowLeft, 
   RotateCcw, 
-  Clock, 
-  AlertTriangle,
-  Tag,
   Download,
-  ChevronRight
+  ChevronRight,
+  Filter,
+  Check
 } from 'lucide-react';
 import { INITIAL_DECISIONS } from '../types/decision';
 import type { DecisionRecord, DecisionStatus, DecisionCategory } from '../types/decision';
@@ -28,7 +27,7 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
   const [categoryFilter, setCategoryFilter] = useState<DecisionCategory | 'all'>('all');
   const [selectedTag, setSelectedTag] = useState<string | 'all'>('all');
 
-  // Compute metrics
+  // Metrics
   const totalCount = decisions.length;
   const activeCount = decisions.filter(d => d.status === 'active').length;
   const supersededCount = decisions.filter(d => d.status === 'superseded').length;
@@ -81,7 +80,7 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(decisions, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `decision-log-export-${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `decision-log-${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -93,28 +92,24 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090A0F] text-slate-200 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Top Banner / Breadcrumb Header */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-8 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0C0D0E] text-[#E5E5E7] flex flex-col font-sans selection:bg-[#E5E5E7] selection:text-[#0C0D0E]">
+      {/* Top Header */}
+      <header className="border-b border-white/[0.08] bg-[#0C0D0E]/95 sticky top-0 z-30 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={onBackToLanding}
-            className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-slate-900 border border-slate-800 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white px-2.5 py-1.5 rounded bg-[#141518] border border-white/[0.08] transition cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Back to Landing Page</span>
-            <span className="sm:hidden">Exit</span>
+            <span className="hidden sm:inline">Back to Overview</span>
           </button>
           
-          <div className="h-4 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-4 w-px bg-white/[0.08] hidden sm:block" />
           
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xs font-mono font-bold">
-              D
-            </div>
-            <span className="font-semibold text-white text-sm tracking-tight">Decisions Registry</span>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Interactive Demo
+            <span className="font-mono text-xs font-semibold text-white">DECISION REGISTRY</span>
+            <span className="text-[10px] font-mono text-neutral-400 border border-white/[0.08] px-1.5 py-0.5 rounded">
+              {filteredDecisions.length} records
             </span>
           </div>
         </div>
@@ -122,108 +117,80 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
         <div className="flex items-center gap-2">
           <button
             onClick={handleResetSampleData}
-            title="Reset to factory sample records"
-            className="text-xs text-slate-400 hover:text-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-900 transition flex items-center gap-1.5 cursor-pointer"
+            title="Reset sample records"
+            className="text-xs text-neutral-400 hover:text-white px-2.5 py-1.5 rounded border border-white/[0.08] bg-[#141518] hover:bg-[#1B1D22] transition flex items-center gap-1.5 cursor-pointer font-mono"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Reset Data</span>
+            <RotateCcw className="w-3 h-3" />
+            <span className="hidden md:inline">Reset</span>
           </button>
 
           <button
             onClick={handleExportJson}
-            className="text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer"
+            className="text-xs text-neutral-300 hover:text-white px-2.5 py-1.5 rounded border border-white/[0.08] bg-[#141518] hover:bg-[#1B1D22] transition flex items-center gap-1.5 cursor-pointer font-mono"
           >
-            <Download className="w-3.5 h-3.5 text-amber-400" />
+            <Download className="w-3 h-3 text-neutral-400" />
             <span className="hidden sm:inline">Export JSON</span>
           </button>
 
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="text-xs text-slate-950 font-semibold bg-amber-400 hover:bg-amber-300 px-3.5 py-1.5 rounded-lg shadow-sm shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+            className="text-xs text-black font-semibold bg-white hover:bg-neutral-200 px-3 py-1.5 rounded transition flex items-center gap-1 cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>New Decision</span>
           </button>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="glass-panel p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-slate-400">Total Recorded</span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="text-2xl font-bold text-white font-mono">{totalCount}</span>
-              <span className="text-xs text-slate-500 font-mono">ADRs</span>
-            </div>
+      {/* Main Workspace */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-6 space-y-6">
+        {/* Status Counters Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+          <div className="border border-white/[0.08] bg-[#121316] p-3 rounded flex justify-between items-center">
+            <span className="text-neutral-500">TOTAL</span>
+            <span className="text-white font-semibold text-sm">{totalCount}</span>
           </div>
-          <div className="glass-panel p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/10 flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-emerald-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Active Enforced
+          <div className="border border-white/[0.08] bg-[#121316] p-3 rounded flex justify-between items-center">
+            <span className="text-emerald-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              ACTIVE
             </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="text-2xl font-bold text-emerald-300 font-mono">{activeCount}</span>
-              <span className="text-xs text-emerald-500/70 font-mono">
-                {Math.round((activeCount / (totalCount || 1)) * 100)}%
-              </span>
-            </div>
+            <span className="text-white font-semibold text-sm">{activeCount}</span>
           </div>
-          <div className="glass-panel p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-slate-400 flex items-center gap-1">
-              <RotateCcw className="w-3 h-3 text-slate-500" />
-              Superseded
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="text-2xl font-bold text-slate-300 font-mono">{supersededCount}</span>
-              <span className="text-xs text-slate-500 font-mono">Archived</span>
-            </div>
+          <div className="border border-white/[0.08] bg-[#121316] p-3 rounded flex justify-between items-center">
+            <span className="text-neutral-400">SUPERSEDED</span>
+            <span className="text-white font-semibold text-sm">{supersededCount}</span>
           </div>
-          <div className="glass-panel p-4 rounded-xl border border-amber-500/20 bg-amber-950/10 flex flex-col justify-between">
-            <span className="text-xs font-mono uppercase text-amber-400 flex items-center gap-1">
-              <Clock className="w-3 h-3 text-amber-400" />
-              Under Review
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="text-2xl font-bold text-amber-300 font-mono">{proposedCount}</span>
-              <span className="text-xs text-amber-500/70 font-mono">RFC</span>
-            </div>
+          <div className="border border-white/[0.08] bg-[#121316] p-3 rounded flex justify-between items-center">
+            <span className="text-amber-400">PROPOSED</span>
+            <span className="text-white font-semibold text-sm">{proposedCount}</span>
           </div>
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        {/* Filter Bar */}
+        <div className="border border-white/[0.08] bg-[#121316] p-3 rounded flex flex-col md:flex-row gap-3 items-center justify-between text-xs">
+          <div className="relative w-full md:w-80">
+            <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by title, rationale, decider, or code..."
-              className="w-full bg-slate-950/80 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-1 focus:ring-amber-500/80 transition"
+              placeholder="Search decisions, why, decider..."
+              className="w-full bg-[#0C0D0E] border border-white/[0.08] rounded pl-8 pr-3 py-1.5 text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-white/30"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-white"
-              >
-                &times;
-              </button>
-            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            {/* Status Filter */}
-            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
+            {/* Status switcher */}
+            <div className="flex items-center bg-[#0C0D0E] border border-white/[0.08] rounded p-0.5 font-mono text-[11px]">
               {(['all', 'active', 'proposed', 'superseded'] as const).map(st => (
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-3 py-1.5 rounded-md font-medium capitalize transition cursor-pointer ${
+                  className={`px-2.5 py-1 rounded capitalize transition cursor-pointer ${
                     statusFilter === st
-                      ? 'bg-slate-800 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-black font-semibold'
+                      : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   {st}
@@ -231,11 +198,11 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
               ))}
             </div>
 
-            {/* Category Filter */}
+            {/* Category */}
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value as any)}
-              className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-amber-500"
+              className="bg-[#0C0D0E] border border-white/[0.08] rounded px-2.5 py-1.5 text-neutral-300 focus:outline-none focus:border-white/30"
             >
               <option value="all">All Categories</option>
               <option value="Architecture">Architecture</option>
@@ -247,30 +214,28 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
           </div>
         </div>
 
-        {/* Tag pills */}
+        {/* Tags */}
         {allTags.length > 0 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs text-slate-400">
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 shrink-0 mr-1 flex items-center gap-1">
-              <Tag className="w-3 h-3" /> Quick Filter:
-            </span>
+          <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono text-neutral-400 pb-1">
+            <span className="text-neutral-500 shrink-0 mr-1">Tags:</span>
             <button
               onClick={() => setSelectedTag('all')}
-              className={`px-2 py-0.5 rounded-full text-[11px] font-mono transition shrink-0 cursor-pointer ${
+              className={`px-2 py-0.5 rounded border transition cursor-pointer ${
                 selectedTag === 'all'
-                  ? 'bg-amber-400 text-slate-950 font-semibold'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                  ? 'border-white bg-white/10 text-white'
+                  : 'border-white/[0.08] bg-[#121316] text-neutral-400 hover:text-white'
               }`}
             >
-              All Tags
+              all
             </button>
             {allTags.map(tag => (
               <button
                 key={tag}
                 onClick={() => setSelectedTag(selectedTag === tag ? 'all' : tag)}
-                className={`px-2 py-0.5 rounded-full text-[11px] font-mono transition shrink-0 cursor-pointer ${
+                className={`px-2 py-0.5 rounded border transition cursor-pointer ${
                   selectedTag === tag
-                    ? 'bg-amber-400 text-slate-950 font-semibold'
-                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                    ? 'border-white bg-white/10 text-white'
+                    : 'border-white/[0.08] bg-[#121316] text-neutral-400 hover:text-white'
                 }`}
               >
                 #{tag}
@@ -279,19 +244,16 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
           </div>
         )}
 
-        {/* Decision Cards Stream */}
+        {/* Decision List Stream */}
         {filteredDecisions.length === 0 ? (
-          <div className="glass-panel p-12 text-center rounded-2xl border border-slate-800 space-y-3">
-            <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto opacity-80" />
-            <h3 className="text-base font-semibold text-white">No decisions match your filter</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Try adjusting your search query, status filters, or tags to find past architecture records.
-            </p>
+          <div className="border border-white/[0.08] bg-[#121316] p-12 text-center rounded text-xs space-y-2">
+            <p className="text-white font-medium">No matching decision records found</p>
+            <p className="text-neutral-500">Try modifying your query or clearing active filters.</p>
             <button
               onClick={() => { setSearchQuery(''); setStatusFilter('all'); setCategoryFilter('all'); setSelectedTag('all'); }}
-              className="text-xs text-amber-400 underline pt-2 inline-block hover:text-amber-300 cursor-pointer"
+              className="text-neutral-300 underline pt-2 inline-block hover:text-white cursor-pointer"
             >
-              Clear all filters
+              Clear filters
             </button>
           </div>
         ) : (
@@ -300,74 +262,65 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
               <div
                 key={item.id}
                 onClick={() => setSelectedDecision(item)}
-                className="group glass-panel glass-panel-hover p-5 rounded-xl border border-slate-800/80 cursor-pointer relative transition-all"
+                className="group border border-white/[0.08] hover:border-white/20 bg-[#121316] hover:bg-[#15171B] p-4 sm:p-5 rounded cursor-pointer transition-all"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                  <div className="space-y-1.5 flex-1 pr-4">
-                    {/* Status & Code line */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-amber-400 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                  <div className="space-y-2 flex-1">
+                    {/* Header info */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+                      <span className="font-semibold text-white px-1.5 py-0.5 bg-white/5 border border-white/10 rounded">
                         {item.code}
                       </span>
-                      <span className="text-xs font-medium text-slate-400 px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/60">
-                        {item.category}
-                      </span>
+                      <span className="text-neutral-400 font-sans">{item.category}</span>
+                      <span className="text-neutral-600">•</span>
 
                       {item.status === 'active' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          Active
+                        <span className="text-emerald-400 text-[11px] flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                          ACTIVE
                         </span>
                       )}
                       {item.status === 'superseded' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
-                          <RotateCcw className="w-3 h-3 text-slate-500" />
-                          Superseded {item.supersededBy ? `by ${item.supersededBy}` : ''}
+                        <span className="text-neutral-500 text-[11px]">
+                          SUPERSEDED {item.supersededBy ? `BY ${item.supersededBy}` : ''}
                         </span>
                       )}
                       {item.status === 'proposed' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                          <Clock className="w-3 h-3" />
-                          Proposed
-                        </span>
+                        <span className="text-amber-400 text-[11px]">PROPOSED</span>
+                      )}
+                      {item.status === 'deprecated' && (
+                        <span className="text-rose-400 text-[11px]">DEPRECATED</span>
                       )}
 
-                      <span className="text-slate-600 text-xs">•</span>
-                      <span className="text-[11px] text-slate-400">
-                        {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
+                      <span className="text-neutral-600">•</span>
+                      <span className="text-neutral-500 text-[11px]">{item.date}</span>
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-base font-semibold text-white group-hover:text-amber-300 transition-colors leading-snug">
+                    <h3 className="text-base font-medium text-white group-hover:text-neutral-200 transition leading-snug">
                       {item.title}
                     </h3>
 
-                    {/* Context Excerpt */}
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                      <span className="text-slate-300 font-medium">Why: </span>
+                    {/* Context Summary */}
+                    <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">
+                      <span className="text-neutral-300 font-medium">Why: </span>
                       {item.context}
                     </p>
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {item.tags.map(t => (
-                        <span key={t} className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-900 text-slate-400 rounded border border-slate-800">
+                        <span key={t} className="text-[10px] font-mono px-1.5 py-0.5 bg-[#0C0D0E] text-neutral-400 rounded border border-white/[0.04]">
                           #{t}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Right side: Author & Arrow */}
-                  <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-slate-800">
-                    <div className="text-left md:text-right">
-                      <p className="text-xs font-medium text-slate-300">{item.decider.name}</p>
-                      <p className="text-[10px] text-slate-500">{item.decider.role}</p>
-                    </div>
-                    <div className="w-8 h-8 rounded-lg bg-slate-800/80 group-hover:bg-amber-400 group-hover:text-slate-950 flex items-center justify-center text-slate-400 transition">
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
+                  {/* Decider */}
+                  <div className="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-white/[0.04] text-xs shrink-0 font-mono">
+                    <span className="text-neutral-300">{item.decider.name}</span>
+                    <span className="text-neutral-500 text-[11px]">{item.decider.role}</span>
                   </div>
                 </div>
               </div>
@@ -376,7 +329,7 @@ export const AppDemo: React.FC<AppDemoProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* Slide-out Drawer for Decision Details */}
+      {/* Slide-out Drawer */}
       <DecisionDrawer
         decision={selectedDecision}
         onClose={() => setSelectedDecision(null)}

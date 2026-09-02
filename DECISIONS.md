@@ -1,44 +1,34 @@
 # Architectural & Design Decisions
 
-This document outlines the core product design decisions, trade-offs, and deliberate non-goals made during the build of **Decision Log**.
+This document outlines the core product decisions, design philosophy, and deliberate non-goals for **Decision Log**.
 
 ---
 
-## 1. What We Built & Why
+## 1. Design Overhaul & Anti-AI Aesthetic Principles
 
-### A. High-Credibility, Executive Landing Page
-- **Why**: The prompt explicitly emphasized that the landing page is more important than the product itself. The value proposition is targeted at founders, CTOs, and staff engineers who feel the pain of knowledge decay, tribal knowledge loss, and circular quarterly re-debates.
-- **Key Elements**:
-  - Crisp headline focusing on "institutional memory engine" rather than generic "note-taking".
-  - Concrete problem breakdown: *The Perpetual Re-debate*, *The Tribal Knowledge Trap*, *The Notion Graveyard*.
-  - Live interactive floating card preview so visitors immediately understand the schema before clicking demo.
-  - Realistic stats (0 hrs lost in Slack archeology, 100% audit trail compliance).
-  - Feature comparison table highlighting the structural advantages over Slack and messy wikis.
+Generic AI generated apps often suffer from telltale tropes:
+- Excessive neon gradients, blur overload, and generic rainbow badges.
+- Buzzword-heavy copy (*"Supercharge your team's synergy with quantum speed"*).
+- Generic cards that look like standard dashboard templates.
 
-### B. Opinionated, Structured ADR Data Schema
-- Rather than a freeform markdown textarea, we implemented a structured Architecture Decision Record (ADR) format:
-  1. **What was decided** (Declarative commitment)
-  2. **Context & Why** (Business / technical driver)
-  3. **Consequences & Trade-offs** (Benefits and trade-offs)
-  4. **Alternatives Considered & Why Rejected** (Critical to stop future re-debating)
-  5. **Status & Superseding Lineage** (`Active`, `Proposed`, `Superseded`, `Deprecated`)
-
-### C. Realistic Founder & Engineering Content
-- Pre-populated the workspace with authentic, technical decisions (PostgreSQL RLS for tenant isolation, PWA consolidation over native mobile, gRPC migration, telemetry retention) rather than "Lorem Ipsum" or generic placeholder text.
-
-### D. Restrained, Editorial Design System
-- Avoided generic AI-generated aesthetics (purple gradients, generic glass blobs, template cards).
-- Built around a dark-slate `#090A0F` base, amber `#F59E0B` accents for emphasis, and emerald `#10B981` indicators for active system states, with typography pairing Inter and JetBrains Mono.
+### What We Changed to Make It Human & Purpose-Built:
+1. **Quiet Luxury & Technical Precision**:
+   - Palette built on refined dark obsidian (`#0C0D0E`), warm surface panels (`#121316`), crisp 1px borders, and pure white high-contrast micro-accents.
+   - Typography pairing: **Newsreader** for editorial elegance in headlines + **Plus Jakarta Sans** for crisp legible UI body + **JetBrains Mono** for technical metadata and status badges.
+2. **Authentic Technical Copy**:
+   - Headlines and problem framing speak directly to seasoned engineers and CTOs: *“Why did we build it this way? An answer that doesn't rot in Slack.”*
+   - Preloaded realistic decisions with real trade-offs (PostgreSQL RLS tenant isolation, gRPC protobuf schemas, PWA consolidation, telemetry Parquet retention).
+3. **Restrained, High-Density Information Layout**:
+   - Clean, scannable decision streams with clear superseding DAG lineage.
+   - 1-Click standardized Markdown ADR and JSON export for actual engineering workflows.
 
 ---
 
 ## 2. What We Deliberately Chose NOT to Build
 
-1. **Authentication & Multi-user Accounts**:
-   - *Rationale*: Out of scope for a fast interactive demo; adds friction to testing the core value proposition.
-2. **Persistent Database Backend / LocalStorage Sync**:
-   - *Rationale*: The specification stated data may reset on refresh. Keeping all mutations in reactive client state ensures high responsiveness with zero cold-start latency.
-3. **Complex Markdown Editor with Image Uploads**:
-   - *Rationale*: Freeform rich text leads to inconsistent documentation. A strict field-based schema enforces concise, high-signal decision logging.
-4. **Heavy Workflow Approval Chains (Multi-stage voting / Jira sync)**:
-   - *Rationale*: Enterprise approval workflows introduce bloat. Decision Log is focused on lightweight consensus and immutable preservation.
+1. **Authentication / Backend Database Persistence**:
+   - Kept in reactive in-memory state as per prompt requirements so anyone can instantly test without friction.
+2. **Heavy WYSIWYG / Rich-Text Editor**:
+   - A rigid 4-field schema (Title, Context/Why, Exact Decision, Rejected Alternatives) enforces high-signal clarity far better than unformatted markdown blobs.
+3. **Complex Multi-Step Jira / GitHub Sync Webhooks**:
+   - Focused purely on lightweight, immediate decision capture and export.
