@@ -2,52 +2,91 @@
 
 @layer base {
   :root {
-    --font-serif: 'Newsreader', 'Merriweather', Georgia, serif;
+    --font-editorial: 'Newsreader', Georgia, serif;
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #0c0d0e;
-    color: #e5e5e7;
-    letter-spacing: -0.011em;
+    background-color: #08090A;
+    color: #E2E4E9;
+    letter-spacing: -0.012em;
+    overflow-x: hidden;
   }
 }
 
-/* Restrained, tactile editorial styling */
 .font-editorial {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: var(--font-editorial);
 }
 
-.border-subtle {
-  border-color: rgba(255, 255, 255, 0.08);
+/* Micro-animations and tactile transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.bg-surface {
-  background-color: #121316;
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.bg-surface-elevated {
-  background-color: #17181c;
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.96); }
 }
 
-.bg-surface-hover:hover {
-  background-color: #1b1d22;
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
 }
 
-/* Custom scrollbar */
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: floatCard 6s ease-in-out infinite;
+}
+
+.pulse-indicator {
+  animation: pulseSubtle 2.5s ease-in-out infinite;
+}
+
+/* Card hover and interactive tactile physics */
+.card-hover {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-hover:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background-color: #14161B;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6);
+}
+
+.btn-tactile {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-tactile:active {
+  transform: scale(0.97);
+}
+
+/* Custom minimal scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0c0d0e;
+  background: #08090A;
 }
 ::-webkit-scrollbar-thumb {
-  background: #23252b;
-  border-radius: 2px;
+  background: #202227;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #343740;
+  background: #32353E;
 }
