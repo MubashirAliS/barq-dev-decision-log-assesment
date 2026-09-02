@@ -6,6 +6,10 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: var(--font-sans);
     background-color: #0a0a0a;
@@ -15,14 +19,44 @@
   }
 }
 
-/* Keyframes for smooth continuous motion across app */
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: translateY(0); }
+/* Scroll-triggered reveal animations */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
-@keyframes fadeInDown {
-  0% { opacity: 0; transform: translateY(-14px); }
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-left.is-revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-right.is-revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Keyframes for instant micro-animations */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(16px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
@@ -32,13 +66,8 @@
 }
 
 @keyframes modalPop {
-  0% { transform: scale(0.95); opacity: 0; }
+  0% { transform: scale(0.94); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes floatGentle {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
 }
 
 @keyframes marquee {
@@ -48,16 +77,11 @@
 
 @keyframes pulseOrange {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(0.88); opacity: 0.5; }
 }
 
-/* Reusable animation utility classes */
 .animate-fade-up {
-  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-fade-down {
-  animation: fadeInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-drawer {
@@ -66,10 +90,6 @@
 
 .animate-modal {
   animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-float {
-  animation: floatGentle 5s ease-in-out infinite;
 }
 
 .animate-marquee {
@@ -85,27 +105,22 @@
   animation: pulseOrange 2.5s ease-in-out infinite;
 }
 
-/* Stagger animation delay helpers */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-
-/* Interactive Hover & Tactile Physics */
+/* Interactive Card & Button Physics */
 .orange-card-hover {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .orange-card-hover:hover {
-  border-color: rgba(249, 115, 22, 0.45);
+  border-color: rgba(249, 115, 22, 0.5);
   transform: translateY(-3px);
   background-color: #14161C;
-  box-shadow: 0 16px 36px -10px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 16px 36px -10px rgba(249, 115, 22, 0.15);
 }
 
 .btn-orange-glow {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-orange-glow:hover {
-  box-shadow: 0 0 25px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.45);
   transform: translateY(-1px);
 }
 .btn-orange-glow:active {
@@ -122,7 +137,7 @@
   transform: scale(0.97);
 }
 
-/* Custom minimal scrollbar */
+/* Minimal Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
